@@ -26,9 +26,19 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
+
+
+    const roomsCollection = client.db("hotelBookingDB").collection("rooms");
+
+    app.get('/rooms', async(req, res)=>{
+      const result = await roomsCollection.find().toArray()
+      res.send(result)
+    })
+
+    
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
     // Ensures that the client will close when you finish/error
@@ -40,9 +50,9 @@ run().catch(console.dir);
 
 
 app.get('/', (req, res) => {
-    res.send('Brand shop app is running !')
+    res.send('Hotel Booking app is running !')
   })
   
 app.listen(port, () => {
-    console.log(`Brand shop app running on port ${port}`)
+    console.log(`Hotel Booking app running on port ${port}`)
   })

@@ -30,10 +30,19 @@ async function run() {
 
 
     const roomsCollection = client.db("hotelBookingDB").collection("rooms");
+    const bookingsCollection = client.db("hotelBookingDB").collection("bookings");
 
     app.get('/rooms', async(req, res)=>{
       const result = await roomsCollection.find().toArray()
       res.send(result)
+    })
+
+    // bookings
+    app.post('/bookings', async(req, res)=>{
+      const booking = req.body
+      const result = await bookingsCollection.insertOne(booking)
+      res.send(result)
+  
     })
 
     

@@ -1,4 +1,5 @@
 require('dotenv').config();
+const jwt = require('jsonwebtoken');
 const express = require('express');
 const cors = require('cors');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
@@ -32,12 +33,30 @@ async function run() {
     const roomsCollection = client.db("hotelBookingDB").collection("rooms");
     const bookingsCollection = client.db("hotelBookingDB").collection("bookings");
 
+    // Jwt
+    app.get('/jwt', async(req, res)=>{
+      const user = req.body
+      console.log(user);
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1h'})
+
+      res
+      .cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production', // Set to true in production
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'strict', // Adjust based on your requirements
+        // maxAge: // how much time the cookie will exist
+    })
+      .send({success: true})
+    })
+
+    
+    // Rooms
     app.get('/rooms', async(req, res)=>{
       const result = await roomsCollection.find().toArray()
       res.send(result)
     })
 
-    // bookings
+    // Bookings
     app.post('/bookings', async(req, res)=>{
       const booking = req.body
       const result = await bookingsCollection.insertOne(booking)

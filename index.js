@@ -1,14 +1,19 @@
 require('dotenv').config();
-const jwt = require('jsonwebtoken');
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const app = express()
 const port = process.env.PORT || 5000
 
 // middleware
-app.use(cors())
+app.use(cors({
+  origin: ['http://localhost:5173'],
+  credentials: true
+}))
 app.use(express.json())
+app.use(cookieParser())
 
 
 
@@ -34,9 +39,8 @@ async function run() {
     const bookingsCollection = client.db("hotelBookingDB").collection("bookings");
 
     // Jwt
-    app.get('/jwt', async(req, res)=>{
+    app.post('/jwt', async(req, res)=>{
       const user = req.body
-      console.log(user);
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1h'})
 
       res
@@ -49,7 +53,12 @@ async function run() {
       .send({success: true})
     })
 
-    
+    app.post('/logout', async(req, res)=>{
+      const user = req.body
+      res.clearCookie('token',{maxAge: 0}).send({success: true})
+    })
+
+
     // Rooms
     app.get('/rooms', async(req, res)=>{
       const result = await roomsCollection.find().toArray()
@@ -57,6 +66,11 @@ async function run() {
     })
 
     // Bookings
+    app.get('/bookings', async(req, res)=>{
+      const result = await bookingsCollection.find().toArray()
+      res.send(result)
+    })
+
     app.post('/bookings', async(req, res)=>{
       const booking = req.body
       const result = await bookingsCollection.insertOne(booking)

@@ -112,6 +112,20 @@ async function run() {
       res.send(result)
   
     })
+    
+    app.patch('/bookings/:id', async(req, res) =>{
+      const id = req.params.id
+      const filter = {_id: new ObjectId(id)}
+      const options = {upsert: true}
+      const updatedDate = req.body
+      const updateDoc = {
+          $set:{
+            date:updatedDate.date, 
+          }
+      } 
+      const result = await bookingsCollection.updateOne(filter, updateDoc, options)
+      res.send(result)
+  })
 
     app.delete('/bookings/:id', async(req, res)=>{
       const id = req.params.id

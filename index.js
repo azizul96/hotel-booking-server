@@ -92,6 +92,22 @@ async function run() {
       res.send(result)
     })
 
+    app.patch('/rooms/:id', async(req, res) =>{
+      const id = req.params.id
+      const filter = {_id: new ObjectId(id)}
+      // console.log(filter);
+      const options = {upsert: true}
+      const updatedDate = req.body
+      const updateDoc = {
+          $set:{
+            availableSeats:updatedDate.a_room, 
+          }
+      } 
+      const result = await roomsCollection.updateOne(filter, updateDoc, options)
+      res.send(result)
+    })
+
+
     // Bookings
     app.get('/bookings', verifyToken, async(req, res)=>{
 
@@ -116,7 +132,7 @@ async function run() {
     app.patch('/bookings/:id', async(req, res) =>{
       const id = req.params.id
       const filter = {_id: new ObjectId(id)}
-      console.log(filter);
+      // console.log(filter);
       const options = {upsert: true}
       const updatedDate = req.body
       const updateDoc = {
@@ -140,6 +156,7 @@ async function run() {
       const result = await reviewsCollection.find().toArray()
       res.send(result)
     })
+    
 
     app.post('/reviews', async(req, res)=>{
       const review = req.body

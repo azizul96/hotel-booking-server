@@ -32,16 +32,16 @@ const client = new MongoClient(uri, {
 // middleware
 const verifyToken = async(req, res, next)=>{
   const token = req?.cookies?.token
-  console.log('value of token ', token);
+  // console.log('value of token ', token);
   if(!token){
       return res.status(401).send({message: 'Not Authorized'})
   }
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) =>{
     if(err){
-      console.log(err);
+      // console.log(err);
       return res.status(401).send({message: 'Not Authorized'})
     }
-    console.log('value in the token', decoded);
+    // console.log('value in the token', decoded);
     req.user = decoded
     next()
   })
@@ -56,6 +56,7 @@ async function run() {
 
     const roomsCollection = client.db("hotelBookingDB").collection("rooms");
     const bookingsCollection = client.db("hotelBookingDB").collection("bookings");
+    const reviewsCollection = client.db("hotelBookingDB").collection("reviews");
 
     // Jwt
     app.post('/jwt', async(req, res)=>{
@@ -110,12 +111,12 @@ async function run() {
       const booking = req.body
       const result = await bookingsCollection.insertOne(booking)
       res.send(result)
-  
     })
     
     app.patch('/bookings/:id', async(req, res) =>{
       const id = req.params.id
       const filter = {_id: new ObjectId(id)}
+      console.log(filter);
       const options = {upsert: true}
       const updatedDate = req.body
       const updateDoc = {
@@ -131,6 +132,18 @@ async function run() {
       const id = req.params.id
       const query = { _id: new ObjectId(id)}
       const result = await bookingsCollection.deleteOne(query)
+      res.send(result)
+    })
+
+    // Reviews
+    app.get('/reviews', async(req, res)=>{
+      const result = await reviewsCollection.find().toArray()
+      res.send(result)
+    })
+
+    app.post('/reviews', async(req, res)=>{
+      const review = req.body
+      const result = await reviewsCollection.insertOne(review)
       res.send(result)
     })
 
